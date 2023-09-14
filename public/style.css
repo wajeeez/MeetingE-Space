@@ -1,0 +1,408 @@
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap");
+
+:root {
+  --main-darklg: #1d2635;
+  --main-dark: #161d29;
+  --primary-color: #2f80ec;
+  --red-color:#ff0000;
+  --main-light: #eeeeee;
+  font-family: "Poppins", sans-serif;
+  --wb-width: 800px;
+    --wb-height: 600px;
+    --wb-bg: radial-gradient(#393939, #000000);
+    --box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+
+
+
+      /* common */
+      --navbar-bg: rgba(0, 0, 0, 0.2);
+      --body-bg: radial-gradient(#393939, #000000);
+      --border: 0.5px solid rgb(255 255 255 / 32%);
+  
+      --msger-top: 50%;
+      --msger-left: 50%;
+      --msger-height: 680px;
+      --msger-width: 420px;
+      --msger-bubble-width: 85%;
+  
+      --caption-height: 680px;
+      --caption-width: 420px;
+  
+      /* video iframe */
+      --iframe-width: 800px;
+      --iframe-height: 600px;
+  
+      /* whiteboard resize */
+      --wb-width: 70%;
+      --wb-height: 580px;
+  
+      /* my settings */
+      --mySettings-select-w: 100%;
+  
+      /* btns hover scale 110% zoom */
+      --btns-hover-scale: scale(1.1);
+      --hover-color: grey;
+  
+      /* video elem border color */
+      --elem-border-color: none; /* 1px solid rgb(255 255 255 / 32%) */
+  
+      --tab-btn-active: rgb(30 29 29);
+  
+      --btn-bar-bg-color: #fff;
+      --btn-bar-color: #000;
+  
+      /* left buttons bar vertical default */
+      --btns-top: 50%;
+      --btns-right: 0%;
+      --btns-left: 15px;
+      --btns-margin-left: 0px;
+      --btns-width: 40px;
+      --btns-flex-direction: column;
+  
+      /* left buttons bar horizontal
+      --btns-top: 95%;
+      --btns-right: 25%;
+      --btns-left: 50%;
+      --btns-margin-left: -300px;
+      --btns-width: 600px;
+      --btns-flex-direction: row;
+      */
+  
+      /* dark theme */
+      --body-bg: radial-gradient(#393939, #000000);
+      --msger-bg: radial-gradient(#393939, #000000);
+      --msger-private-bg: radial-gradient(#393939, #000000);
+      --wb-bg: radial-gradient(#393939, #000000);
+      --select-bg: #2c2c2c;
+      --box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+  
+      /* chat msg boble */
+      --left-msg-bg: #252d31;
+      --right-msg-bg: #056162;
+      --private-msg-bg: #6b1226;
+  
+      /* volume detected */
+      --volume-up: 0px 8px 16px 0px rgb(249, 253, 0);
+  
+      /* video avatar img size */
+      --vmi-wh: 15vw;
+      /* 
+          https://developer.mozilla.org/it/docs/Web/CSS/object-fit 
+      */
+      --video-object-fit: cover;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+}
+
+.header {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 8vh;
+  position: relative;
+  width: 100%;
+  background-color: var(--main-darklg);
+}
+
+.logo > h3 {
+  color: var(--main-light);
+}
+
+.main {
+  overflow: hidden;
+  height: 92vh;
+  display: flex;
+}
+
+.main__left {
+  flex: 0.7;
+  display: flex;
+  flex-direction: column;
+}
+
+.videos__group {
+  flex-grow: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 1rem;
+  background-color: var(--main-dark);
+}
+
+video {
+  height: 300px;
+  border-radius: 1rem;
+  margin: 0.5rem;
+  width: 400px;
+  object-fit: cover;
+  transform: rotateY(180deg);
+  -webkit-transform: rotateY(180deg);
+  -moz-transform: rotateY(180deg);
+}
+
+.options {
+  padding: 1rem;
+  display: flex;
+  background-color: var(--main-darklg);
+}
+
+.options__left {
+  display: flex;
+}
+
+.options__right {
+  margin-left: auto;
+  display: flex;
+
+}
+#leaveMeetingButton {
+  background-color: var(--red-color);
+}
+.options__button {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: var(--primary-color);
+  height: 50px;
+  border-radius: 5px;
+  color: var(--main-light);
+  font-size: 1.2rem;
+  width: 50px;
+  margin: 0 0.5rem;
+}
+
+.background__red {
+  background-color: #f6484a;
+}
+
+.main__right {
+  display: flex;
+  flex-direction: column;
+  flex: 0.3;
+  background-color: #242f41;
+}
+
+.main__chat_window {
+  flex-grow: 1;
+  overflow-y: scroll;
+}
+
+.main__chat_window::-webkit-scrollbar {
+  display: none;
+}
+
+.main__message_container {
+  padding: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.main__message_container > input {
+  height: 50px;
+  flex: 1;
+  font-size: 1rem;
+  border-radius: 5px;
+  padding-left: 20px;
+  border: none;
+}
+
+.messages {
+  display: flex;
+  flex-direction: column;
+  margin: 1.5rem;
+}
+
+.message {
+  display: flex;
+  flex-direction: column;
+}
+
+.message > b {
+  color: #eeeeee;
+  display: flex;
+  align-items: center;
+  text-transform: capitalize;
+}
+
+.message > b > i {
+  margin-right: 0.7rem;
+  font-size: 1.5rem;
+}
+
+.message > span {
+  background-color: #eeeeee;
+  margin: 1rem 0;
+  padding: 1rem;
+  border-radius: 5px;
+}
+
+#video-grid {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+#showChat {
+  display: none;
+}
+
+.header__back {
+  display: none;
+  position: absolute;
+  font-size: 1.3rem;
+  top: 17px;
+  left: 28px;
+  color: #fff;
+}
+
+@media (max-width: 700px) {
+  .main__right {
+    display: none;
+  }
+  .main__left {
+    width: 100%;
+    flex: 1;
+  }
+
+  video {
+    height: auto;
+    width: 100%;
+  }
+
+  #showChat {
+    display: flex;
+  }
+}
+
+
+/* WhiteBoard */
+/*--------------------------------------------------------------
+# Whiteboard
+--------------------------------------------------------------*/
+
+#whiteboard {
+  z-index: 11;
+  position: fixed;
+  margin: auto;
+  padding: 10px;
+  width: var(--wb-width);
+  height: var(--wb-height);
+  background: var(--wb-bg);
+  border: var(--border);
+  box-shadow: var(--box-shadow);
+  border-radius: 10px;
+  /* center */
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  /* fade in */
+  -webkit-animation: fadeIn ease-in 1;
+  -moz-animation: fadeIn ease-in 1;
+  animation: fadeIn ease-in 1;
+  -webkit-animation-fill-mode: forwards;
+  -moz-animation-fill-mode: forwards;
+  animation-fill-mode: forwards;
+  -webkit-animation-duration: 1s;
+  -moz-animation-duration: 1s;
+  animation-duration: 1s;
+  overflow: hidden;
+}
+
+.whiteboard-header {
+  display: flex;
+  justify-content: space-between;
+  padding: 5px;
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.2);
+  color: #ffffff;
+  cursor: move;
+}
+
+.whiteboard-header-title {
+  display: flex;
+  align-items: center;
+}
+
+#whiteboardLockBtn {
+  margin-left: 5px;
+  margin-right: 5px;
+}
+
+.whiteboard-header-title button,
+.whiteboard-header-options button {
+  padding: 10px;
+  font-size: 1.2rem;
+  margin: 1px;
+  background: rgba(0, 0, 0, 0.2);
+  color: #fff;
+  border: var(--border);
+  border-radius: 5px;
+  transition: all 0.3s ease-in-out;
+  transition: background 0.23s;
+}
+
+.whiteboard-header-title button:hover,
+.whiteboard-header-options button:hover {
+  color: var(--hover-color);
+  transform: var(--btns-hover-scale);
+  transition: all 0.3s ease-in-out;
+}
+
+.whiteboardColorPicker {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  padding: 0;
+  width: 20px;
+  height: 20px;
+  margin: 1px;
+  border-radius: 50px;
+  border: solid 0.5px #afadad38;
+  cursor: pointer;
+}
+.whiteboardColorPicker:hover {
+  transform: var(--btns-hover-scale);
+  transition: all 0.3s ease-in-out;
+}
+.whiteboardColorPicker::-webkit-color-swatch {
+  border: none;
+  border-radius: 20px;
+  padding: 0;
+}
+.whiteboardColorPicker::-webkit-color-swatch-wrapper {
+  border: none;
+  border-radius: 20px;
+  padding: 0;
+}
+.whiteboardColorPicker::-moz-color-swatch {
+  border: none;
+  border-radius: 20px;
+  padding: 0;
+}
+.whiteboardColorPicker::-moz-color-swatch-wrapper {
+  border: none;
+  border-radius: 20px;
+  padding: 0;
+}
+.whiteboardColorPicker::color-swatch {
+  border: none;
+  border-radius: 20px;
+  padding: 0;
+}
+.whiteboardColorPicker::color-swatch-wrapper {
+  border: none;
+  border-radius: 20px;
+  padding: 0;
+}
+
+.hidden {
+  display: none;
+}
+
+.show {
+  display: block;
+}

@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>E-Space</title>
+  <link rel="stylesheet" href="style.css" />
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="https://kit.fontawesome.com/c939d0e917.js"></script>
+  <script src="https://unpkg.com/peerjs@1.3.1/dist/peerjs.min.js"></script>
+  <script>
+    const ROOM_ID = "<%= roomId %>";
+    // const NAME  = "<%= name %>"
+  </script>
+</head>
+
+<body>
+  <div class="header">
+    <div class="logo">
+      <div class="header__back">
+        <i class="fas fa-angle-left"></i>
+      </div>
+      <h3>Video Chat</h2>
+    </div>
+  </div>
+  <div class="main">
+    <div class="main__left">
+      <div class="videos__group">
+        <div id="video-grid">
+
+        </div>
+      </div>
+
+      <!-- WHiteBoard -->
+      <!-- <iframe  id="whiteboard"  src="https://miro.com/app/board/uXjVMn9yUqo=/?share_link_id=39028090026" frameborder="0" class="hidden"></iframe>
+      -->
+      <iframe  id="whiteboard"  src="https://www.whiteboard.team/app/board/bx5G-NHieX~rV_dxcWHEMHyLp" frameborder="0" class="hidden"></iframe>
+      
+
+      
+
+
+
+
+
+      <div class="options">
+        <div class="options__left">
+          <div id="stopVideo" class="options__button">
+            <i class="fa fa-video-camera"></i>
+          </div>
+          <div id="muteButton" class="options__button">
+            <i class="fa fa-microphone"></i>
+          </div>
+          <div id="startScreenShare" class="options__button">
+            <i class="fas fa-desktop"></i>
+          </div>
+          <div id="whiteboardBtn" class="options__button">
+            <i class="fas fa-chalkboard-teacher"></i>
+
+          </div>
+          <div id="showChat" class="options__button">
+            <i class="fa fa-comment"></i>
+          </div>
+        </div>
+        <div class="options__right">
+          <div id="inviteButton" class="options__button">
+            <i class="fas fa-user-plus"></i>
+          </div>
+          <div id="leaveMeetingButton" class="options__button">
+            <i class="fas fa-sign-out-alt"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="main__right">
+      <div class="main__chat_window">
+        <div class="messages">
+
+        </div>
+      </div>
+      <div class="main__message_container">
+        <input id="chat_message" type="text" autocomplete="off" placeholder="Type message here...">
+        <div id="send" class="options__button">
+          <i class="fa fa-plus" aria-hidden="true"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+<script>
+
+
+
+
+  const socket = io("/");
+  const videoGrid = document.getElementById("video-grid");
+  const myVideo = document.createElement("video");
+  const showChat = document.querySelector("#showChat");
+  const backBtn = document.querySelector(".header__back");
+  myVideo.muted = true;
+
+  backBtn.addEventListener("click", () => {
+    document.querySelector(".main__left").style.display = "flex";
+    document.querySelector(".main__left").style.flex = "1";
+    document.querySelector(".main__right").style.display = "none";
+    document.querySelector(".header__back").style.display = "none";
+  });
+
+  showChat.addEventListener("click", () => {
+    document.querySelector(".main__right").style.display = "flex";
+    document.querySelector(".main__right").style.flex = "1";
+    document.querySelector(".main__left").style.display = "none";
+    document.querySelector(".header__back").style.display = "block";
+  });
+
+  const user ="NAME";
+
+  var peer = new Peer({
+    host: '127.0.0.1',
+    port: 3030,
+    path: '/peerjs',
+    config: {
+      'iceServers': [
+        { url: 'stun:stun01.sipphone.com' },
+        { url: 'stun:stun.ekiga.net' },
+        { url: 'stun:stunserver.org' },
+        { url: 'stun:stun.softjoys.com' },
+        { url: 'stun:stun.voiparound.com' },
+        { url: 'stun:stun.voipbuster.com' },
+        { url: 'stun:stun.voipstunt.com' },
+        { url: 'stun:stun.voxgratia.org' },
+        { url: 'stun:stun.xten.com' },
+        {
+          url: 'turn:192.158.29.39:3478?transport=udp',
+          credential: 'JZEOEt2V3Qb0y27GRntt2u2PAYA=',
+          username: '28224511:1379330808'
+        },
+        {
+          url: 'turn:192.158.29.39:3478?transport=tcp',
+          credential: 'JZEOEt2V3Qb0y27GRntt2u2PAYA=',
+          username: '28224511:1379330808'
+        }
+      ]
+    },
+
+    debug: 3
+  });
+
+  socket.on("user-disconnected", (userId) => {
+    const videoElement = document.querySelector(`#${userId}`);
+    if (videoElement) {
+      videoElement.remove();
+    }
+  });
+
+  socket.on("disconnect", () => {
+    // Handle user disconnection logic
+    io.to(roomId).emit("user-disconnected", userId);
+    // ...
+  });
+
+
+  socket.on("start-screen-share", (roomId, screenStream) => {
+    // Broadcast the screen sharing stream to other participants in the room
+    socket.to(roomId).broadcast.emit("user-started-screen-share", socket.id, screenStream);
+  });
+
+
+  socket.on("user-started-screen-share", (userId, screenStream) => {
+    const screenVideo = document.createElement("video");
+    screenVideo.srcObject = screenStream;
+    screenVideo.play();
+
+    // Add the screen sharing video to the grid
+    addVideoStream(screenVideo, screenStream);
+  });
+  // socket.on("whiteboardAction", handleWhiteboardAction);
+
+  // Function to send whiteboard actions to other participants
+  function sendWhiteboardAction(action) {
+    socket.emit("whiteboardAction", action);
+  }
+
+  let myVideoStream;
+  navigator.mediaDevices
+    .getUserMedia({
+      audio: true,
+      video: true,
+    })
+    .then((stream) => {
+      myVideoStream = stream;
+      addVideoStream(myVideo, stream);
+
+      peer.on("call", (call) => {
+        console.log('someone call me');
+        call.answer(stream);
+        const video = document.createElement("video");
+        call.on("stream", (userVideoStream) => {
+          addVideoStream(video, userVideoStream);
+        });
+      });
+
+      // socket.on("user-connected", (userId) => {
+      //   connectToNewUser(userId, stream);
+      // });
+      socket.on("user-connected", (userId) => {
+        console.log("New user connected: " + userId);
+        connectToNewUser(userId, myVideoStream);
+      });
+      // Handle user disconnections
+
+
+
+
+
+
+
+
+
+
+    });
+
+  // const connectToNewUser = (userId, stream) => {
+  //   console.log('I call someone' + userId);
+  //   const call = peer.call(userId, stream);
+  //   const video = document.createElement("video");
+  //   call.on("stream", (userVideoStream) => {
+  //     addVideoStream(video, userVideoStream);
+  //   });
+  // };
+
+  // SOCKET ON NEW USER 
+
+
+  const connectToNewUser = (userId, stream) => {
+    console.log('I call someone' + userId);
+    const call = peer.call(userId, stream);
+
+    // Create a new video element for the remote user
+    const video = document.createElement("video");
+    call.on("stream", (userVideoStream) => {
+      addVideoStream(video, userVideoStream);
+    });
+
+    // Handle call closing (e.g., when a user disconnects)
+    call.on("close", () => {
+      video.remove();
+    });
+
+
+
+    // Store the call object in an array or object for future reference
+    // This step allows you to close the call when needed, for example, when the user leaves the meeting
+    // callObjects[userId] = call;
+  };
+
+
+
+  peer.on("open", (id) => {
+    console.log('my id is' + id);
+    socket.emit("join-room", ROOM_ID, id, user);
+  });
+
+  const addVideoStream = (video, stream) => {
+    video.srcObject = stream;
+    video.addEventListener("loadedmetadata", () => {
+      video.play();
+      videoGrid.append(video);
+    });
+  };
+
+  //   const addVideoStream = (video, stream) => {
+  //   // Stop the current stream if the video element is already playing
+  //   if (video.srcObject) {
+  //     const currentStream = video.srcObject;
+  //     const tracks = currentStream.getTracks();
+
+  //     tracks.forEach((track) => {
+  //       track.stop();
+  //     });
+  //   }
+
+  //   // Clear the current srcObject
+  //   video.srcObject = null;
+
+  //   // Set the new srcObject
+  //   video.srcObject = stream;
+
+  //   video.addEventListener("loadedmetadata", () => {
+  //     video.play().catch((error) => {
+  //       console.error("Error playing video:", error);
+  //     });
+  //     videoGrid.append(video);
+  //   });
+  // };
+
+
+
+  let text = document.querySelector("#chat_message");
+  let send = document.getElementById("send");
+  let messages = document.querySelector(".messages");
+
+  send.addEventListener("click", (e) => {
+    if (text.value.length !== 0) {
+      socket.emit("message", text.value);
+      text.value = "";
+    }
+  });
+
+  text.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" && text.value.length !== 0) {
+      socket.emit("message", text.value);
+      text.value = "";
+    }
+  });
+
+  const inviteButton = document.querySelector("#inviteButton");
+  const muteButton = document.querySelector("#muteButton");
+  const stopVideo = document.querySelector("#stopVideo");
+
+  muteButton.addEventListener("click", () => {
+    const enabled = myVideoStream.getAudioTracks()[0].enabled;
+    if (enabled) {
+      myVideoStream.getAudioTracks()[0].enabled = false;
+      html = `<i class="fas fa-microphone-slash"></i>`;
+      muteButton.classList.toggle("background__red");
+      muteButton.innerHTML = html;
+    } else {
+      myVideoStream.getAudioTracks()[0].enabled = true;
+      html = `<i class="fas fa-microphone"></i>`;
+      muteButton.classList.toggle("background__red");
+      muteButton.innerHTML = html;
+    }
+  });
+
+  stopVideo.addEventListener("click", () => {
+    const enabled = myVideoStream.getVideoTracks()[0].enabled;
+    if (enabled) {
+      myVideoStream.getVideoTracks()[0].enabled = false;
+      html = `<i class="fas fa-video-slash"></i>`;
+      stopVideo.classList.toggle("background__red");
+      stopVideo.innerHTML = html;
+    } else {
+      myVideoStream.getVideoTracks()[0].enabled = true;
+      html = `<i class="fas fa-video"></i>`;
+      stopVideo.classList.toggle("background__red");
+      stopVideo.innerHTML = html;
+    }
+  });
+
+  inviteButton.addEventListener("click", (e) => {
+    prompt(
+      "Copy this link and send it to people you want to meet with",
+      window.location.href
+    );
+  });
+
+  socket.on("createMessage", (message, userName) => {
+    messages.innerHTML =
+      messages.innerHTML +
+      `<div class="message">
+        <b><i class="far fa-user-circle"></i> <span> ${userName === user ? "me" : userName
+      }</span> </b>
+        <span>${message}</span>
+    </div>`;
+  });
+
+  function getId(id) {
+    return document.getElementById(id);
+  }
+
+
+
+
+  //WhiteBOARD
+
+  // ... (previous code)
+
+  const startScreenShareBtn = document.getElementById("startScreenShare");
+  let screenStream; // Store the screen sharing stream
+
+  // Function to start screen sharing
+
+  // Function to start screen sharing
+  // async function startScreenSharing() {
+  //   try {
+  //     screenStream = await navigator.mediaDevices.getDisplayMedia({ video: true });
+
+  //     // Create a new video element for screen sharing with user's ID as the element ID
+  //     const screenVideo = document.createElement("video");
+  //     screenVideo.srcObject = screenStream;
+  //     screenVideo.muted = true; // Mute the self-view
+  //     screenVideo.play();
+  //     screenVideo.id = peer.id; // Set the user's ID as the video element's ID
+
+  //     // Add the screen sharing video to the grid
+  //     addVideoStream(screenVideo, screenStream);
+
+  //     // Inform other users about screen sharing and send the screen sharing stream
+  //     socket.emit("start-screen-share", ROOM_ID, screenStream);
+
+  //     // Add a stop screen sharing button
+  //     const stopScreenShareBtn = document.createElement("div");
+  //     stopScreenShareBtn.id = "stopScreenShare";
+  //     stopScreenShareBtn.className = "options__button";
+  //     stopScreenShareBtn.innerHTML = '<i class="fas fa-stop"></i>';
+  //     document.querySelector(".options__left").appendChild(stopScreenShareBtn);
+
+  //     // Event listener for stopping screen sharing
+  //     stopScreenShareBtn.addEventListener("click", stopScreenSharing);
+  //   } catch (error) {
+  //     console.error("Error starting screen sharing:", error);
+  //   }
+  // }
+
+  // // Function to stop screen sharing
+  // function stopScreenSharing() {
+  //   if (screenStream) {
+  //     screenStream.getTracks().forEach((track) => track.stop());
+  //     screenStream = null;
+
+  //     // Remove the screen sharing video element
+  //     const screenVideo = document.querySelector(`#${peer.id}`);
+  //     if (screenVideo) {
+  //       screenVideo.remove();
+  //     }
+
+  //     // Inform other users about stopping screen sharing
+  //     socket.emit("stop-screen-share", ROOM_ID);
+
+  //     // Remove the stop screen sharing button
+  //     const stopScreenShareBtn = document.getElementById("stopScreenShare");
+  //     if (stopScreenShareBtn) {
+  //       stopScreenShareBtn.remove();
+  //     }
+  //   }
+  // }
+
+  function setScreenSharingStream(stream) {
+    addVideoStream(screenVideo, screenStream);
+  }
+
+
+  function startScreenShare() {
+    if (screenStream) {
+      stopScreenSharing()
+    }
+    navigator.mediaDevices.getDisplayMedia({ video: true }).then((stream) => {
+      setScreenSharingStream(stream);
+
+      screenStream = stream;
+      let videoTrack = screenStream.getVideoTracks()[0];
+      videoTrack.onended = () => {
+        stopScreenSharing()
+      }
+      if (peer) {
+        let sender = currentPeer.peerConnection.getSenders().find(function (s) {
+          return s.track.kind == videoTrack.kind;
+        })
+        sender.replaceTrack(videoTrack)
+        screenSharing = true
+      }
+      console.log(screenStream)
+    })
+  }
+
+
+
+
+  // Event listener for starting screen sharing
+  startScreenShareBtn.addEventListener("click", startScreenShare);
+
+  // ... (continue with your existing code)
+
+
+
+
+  /// LEAVE MEETING 
+
+  const leaveMeetingButton = document.getElementById("leaveMeetingButton");
+
+  leaveMeetingButton.addEventListener("click", () => {
+    // Implement logic to leave the meeting here
+    leaveMeeting();
+  });
+
+
+  function leaveMeeting() {
+    // Close the video call
+    if (peer) {
+      peer.destroy();
+    }
+
+    // Disconnect from the room
+    socket.emit("leave-room", ROOM_ID);
+
+    // Remove the user's video element from the grid
+    myVideo.remove();
+
+    // Optionally, redirect to a landing page or perform other actions
+    // For example, you can redirect the user to the home page
+    window.location.href = "http://localhost:3000/";
+  }
+
+
+  /// SCREEN SHARING BROADCAST 
+  // Function to start screen sharing
+  // async function startScreenSharing() {
+  //   try {
+  //     screenStream = await navigator.mediaDevices.getDisplayMedia({ video: true });
+
+  //     // Create a new video element for screen sharing
+  //     const screenVideo = document.createElement("video");
+  //     screenVideo.srcObject = screenStream;
+  //     screenVideo.muted = true; // Mute the self-view
+  //     screenVideo.play();
+
+  //     // Add the screen sharing video to the grid
+  //     addVideoStream(screenVideo, screenStream);
+
+  //     // Inform other users about screen sharing and send the screen sharing stream
+  //     socket.emit("start-screen-share", ROOM_ID, screenStream);
+
+  //     // Add a stop screen sharing button
+  //     const stopScreenShareBtn = document.createElement("div");
+  //     stopScreenShareBtn.id = "stopScreenShare";
+  //     stopScreenShareBtn.className = "options__button";
+  //     stopScreenShareBtn.innerHTML = '<i class="fas fa-stop"></i>';
+  //     document.querySelector(".options__left").appendChild(stopScreenShareBtn);
+
+  //     // Event listener for stopping screen sharing
+  //     stopScreenShareBtn.addEventListener("click", stopScreenSharing);
+  //   } catch (error) {
+  //     console.error("Error starting screen sharing:", error);
+  //   }
+  // }
+
+
+
+
+
+
+
+  // WhiteBoard JS
+  const whiteboard = document.getElementById("whiteboard");
+  
+  // Additional functions for handling whiteboard actions (e.g., clear, change color, etc.)
+  // ...
+
+  // Toggle whiteboard visibility
+  function toggleWhiteboard() {
+    whiteboard.classList.toggle("hidden");
+  }
+
+  // Event listener for the whiteboard button
+  const whiteboardBtn = document.getElementById("whiteboardBtn");
+  whiteboardBtn.addEventListener("click", toggleWhiteboard);
+
+</script>
+
+
+
+
+
+
+
+</html>
